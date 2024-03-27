@@ -1,6 +1,7 @@
+import os
 import paramiko
 
-def scp_transfer(remote_host, username, password, remote_file, local_path):
+def scp_transfer(remote_host, username, password, remote_file):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -8,6 +9,14 @@ def scp_transfer(remote_host, username, password, remote_file, local_path):
         ssh.connect(remote_host, username=username, password=password)
         
         scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
+        
+        # Get the directory of the Python script
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        # Construct the local path with the 'received' folder
+        received_folder = os.path.join(script_dir, 'received')
+        os.makedirs(received_folder, exist_ok=True)  # Create 'received' folder if it doesn't exist
+        local_path = os.path.join(received_folder, os.path.basename(remote_file))
         
         scp.get(remote_file, local_path)
         
@@ -25,6 +34,5 @@ if __name__ == "__main__":
     username = 'bhalu'
     password = 'bhalu'
     remote_file = '/home/bhalu/project/capture/test.h264'
-    local_path = 'C:/Something New/'
 
-    scp_transfer(remote_host, username, password, remote_file, local_path)
+    scp_transfer(remote_host, username, password, remote_file)
